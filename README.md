@@ -126,7 +126,11 @@ Finally, you can stop the Minikube altogether once you are done.
 minikube stop
 ```
 
+## Tutorials
+
 ### hello-node
+
+In order to get more familiar with Kubernetes and Docker this is a mini-tutorial for creating a HelloWorld application, creating a Docker image for it, and then deploying the Docker image in Kubernetes. These instructions are taken from the [Kubernetes hello-minikube tutorial](https://kubernetes.io/docs/tutorials/hello-minikube/).
 
 #### Create a HelloWorld node.js application
 
@@ -157,3 +161,24 @@ The Node application should respond with HelloWorld when you navigate to [http:/
 Stop the application with `Ctrl + C`.
 
 #### Create a Docker container image
+
+Create a file, called Dockerfile, that we'll use to create a container for our hello-node server application.
+
+Dockerfile
+
+```docker
+FROM node:6.9.2
+EXPOSE 8080
+COPY server.js .
+CMD node server.js
+```
+
+#### Create the Docker image
+
+```sh
+docker build -t hello-node:v1 .
+```
+
+Now that we have a Docker image, we can run that image in our Kubernetes cluster (in the Minikube VM).
+
+#### Create a Kubernetes Deployment
