@@ -126,7 +126,7 @@ Request Body:
 And then once you have completed this simple verification you can clean things up.
 
 ```sh
-kubectl delete services hello-minikube
+kubectl delete service hello-minikube
 
 kubectl delete deployment hello-minikube
 ```
@@ -137,59 +137,86 @@ Finally, you can stop the Minikube altogether once you are done.
 minikube stop
 ```
 
-## Tutorials
-
-### hello-node
+## Hello Minikube Tutorial
 
 In order to get more familiar with Kubernetes and Docker this is a mini-tutorial for creating a HelloWorld application, creating a Docker image for it, and then deploying the Docker image in Kubernetes. These instructions are taken from the [Kubernetes hello-minikube tutorial](https://kubernetes.io/docs/tutorials/hello-minikube/).
 
-#### Create a HelloWorld node.js application
+### Create a Kubernetes Deployment
 
-Create a file called `server.js` and add the following Javascript to it.
+A little background information is necessary here because by creating a Deployment, there are several things occurring.
 
-```javascript
-var http = require('http');
+**Deployment (def):**  "A Kubernetes Deployment is a type of Kubernetes Controller that provides declarative states for Pods (and ReplicaSets)"
 
-var handleRequest = (request, response) => {
-  console.log(`Received request for URL: ${request.url}`);
-  response.writeHead(200);
-  response.end('HelloWorld');
-};
+A Deployment is said to be the "recommended way to manage the creation and scaling of Pods".  It has the responsibility of checking on the health of a Pod, restarting the Pod's container(s) if they terminate, etc.
 
-var www = http.createServer(handleRequest);
+**Pod (def):**  "A Kubernetes Pod is a group of one or more Containers [Docker], tied together for the purposes of administration and networking."
 
-www.listen(8080);
-```
-
-Run the application
+In the tutorial example, we are going to create a Pod by creating a Deployment, which is going to be based on an existing Docker image hosted by Google in the Google Container Registry (GCR).
 
 ```sh
-node server.js
+kubectl create deployment hello-node --image=gcr.io/hello-minikube-zero-install/hello-node
 ```
 
-The Node application should respond with HelloWorld when you navigate to [http://localhost:8080](http://localhost:8080) in a browser.
-
-Stop the application with `Ctrl + C`.
-
-#### Create a Docker container image
-
-Create a file, called Dockerfile, that we'll use to create a container for our hello-node server application.
-
-Dockerfile
-
-```docker
-FROM node:6.9.2
-EXPOSE 8080
-COPY server.js .
-CMD node server.js
-```
-
-#### Create the Docker image
+The results from running this command are:  the creation of a Deployment and the creation of a Pod.
 
 ```sh
-docker build -t hello-node:v1 .
+# list the Deployments that exist in your Kubernetes cluster
+kubectl get deployments
+
+# list the Pods in your Kubernetes cluster
+kubectl get Pods
 ```
 
-Now that we have a Docker image, we can run that image in our Kubernetes cluster (in the Minikube VM).
+So, what have we done so far?
 
-#### Create a Kubernetes Deployment
+We've created a Pod in our Kubernetes cluster via a Deployment.  Within that Pod there is a Docker Container running that has the example Node application running in it.
+
+Okay, great, now what?
+
+Well, so all of that is great but by default the Pod we created is NOT accessible to anything outside the cluster; the Container is literally only accessible via its internal IP address.  In order to make the Pod valuable to us and usable we need to create a Kubernetes Service.
+
+### Create a Kubernetes Service
+
+Again, some background before we actually create the Service.
+
+**Service (def)"** "A Kubernetes Service is "an abstraction which defines a logical set of Pods and a policy by which to access them -- sometimes called a micro-service".
+
+```sh
+# expose the Pod outside of the Kubernetes cluster
+kubectl expose deployment hello-node --type=LoadBalancer --port=8080
+```
+
+The results from running this command are:  the creation of a Service (of type LoadBalancer).  Note, since we are running things on minikube and NOT on a cloud provider this will make the Service available via a command in minikube.  If we were hosting the Kubernetes cluster on a cloud provider, then the creation of a LoadBalancer type Service would have triggered the creation of an external load balancer within the cloud provider's environment.
+
+```sh
+# view the Service in your Kubernetes cluster
+kubectl get services
+```
+
+In order to access the Load Balancer in our local environment (minikube), you can execute the following command.
+
+```sh
+minikube service hello-node
+```
+
+The result from running this minikube command should be a browser window is launched with the application running!
+
+Once you have completed this tutorial you can clean things up (just like in above verification).
+
+```sh
+kubectl delete service hello-node
+
+kubectl delete deployment hello-node
+```
+
+Finally, you can stop the Minikube altogether once you are done.
+
+```sh
+minikube stop
+
+# optionally, if you are cleaning up everything you can get rid of the Minikube VM
+minikube delete
+```
+
+## Learn Kubernetes Basics Tutorial
+
