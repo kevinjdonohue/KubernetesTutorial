@@ -12,10 +12,17 @@ In order to install Minikube, you first need to install a couple of prerequisite
 
 ### Minikube Prerequisites
 
-1.  A Hypervisor (VirtualBox, KVM, etc.)
-2.  kubectl
+1. A Hypervisor (VirtualBox, KVM, etc.)
+1. kubectl
 
 For the Hypervisor prerequisite, I installed VirtualBox (5.2.12 for Ubuntu 18.04) from the [VirtualBox download page](https://www.virtualbox.org/wiki/Linux_Downloads).
+
+**UPDATE**:  For the Hypervisor prerequisite on openSUSE Tumbleweed, I installed KVM instead.
+
+The opneSUSE documentation provided a nice, straight-forward method for installing the packages necessary to get KVM via a [Zypper pattern](https://doc.opensuse.org/documentation/leap/virtualization/html/book.virt/cha.vt.installation.html).  A couple of aspects that were a little tricky.  
+
+1. [libvert](https://doc.opensuse.org/documentation/leap/virtualization/html/book.virt/cha.libvirt.overview.html) -- This is a service that needs to be running on your workstation.  Since I didn't want to run this service all the time, I didn't configure it to run all the time.  Therefoe, you just need to get it running first and *then* run minikube.
+1. [KVM2 Driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#kvm2-driver) -- This is required to run KVM2 on your workstation.
 
 For the kubectl prerequisite, I had to execute a few shell commands, per the [Kubernetes kubectl installation page](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
 
@@ -53,7 +60,11 @@ Since I'm installing things on Ubuntu, I downloaded the .deb package (v0.27.0) f
 Once Minikube is installed we should be able to start it up, which should download a VM to house the Kubernetes cluster. On my Ubuntu workstation, the .ISO for the VM as well as other settings are all stored in `~/.minikube`.
 
 ```sh
+# this starts minikube with the default Hypervisor, which is VirtualBox
 minikube start
+
+# on openSUSE Tumbleweed with the KVM2 Hypervisor instead, you need to pass an arg:
+minikube start --vm-driver=kvm2
 
 minikube get-k8s-versions
 
